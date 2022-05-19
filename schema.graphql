@@ -1,0 +1,24 @@
+type Storage @entity {
+  id: ID!
+  from: BigInt!
+  to: BigInt!
+
+}
+
+type Epnspushgraph @entity {
+  id: ID!
+  count: BigInt!
+  recipient: String!
+  acta: String!
+  aimg: String!
+  amsg: String!
+  asub: String!
+  type: String!
+  secret: String!
+  title: String!
+  body: String!
+}
+
+
+
+
