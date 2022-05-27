@@ -6,9 +6,9 @@ import {
   JSONValueKind,
   log } from "@graphprotocol/graph-ts"
 import { NumberChanged } from '../generated/Storage/Storage'
-import { Storage, Epnspushgraph } from '../generated/schema'
+import { Storage, EpnsNotificationCounter, EpnsPushNotification } from '../generated/schema'
 
-const CHANNEL_ADDRESS = '0x9dFe790B3baBCBD888dA7093017a0B7A68b99937'
+const subgraphID = "aiswaryawalter/graph-poc-sample"
 
 export function handleNumberChanged(event: NumberChanged): void {
   let id = event.transaction.hash.toHexString()
@@ -22,59 +22,46 @@ export function handleNumberChanged(event: NumberChanged): void {
   storage.to = event.params.to
   storage.save()
   let recipient = "0xD8634C39BBFd4033c0d3289C4515275102423681",
-    cta = "https://epns.io/",
-    img = "null",
-    msg = `Number changed from ${event.params.from} to ${event.params.to}`,
-    sub = "Number changed",
-    type = "3",
-    secret = "null",
-    title = "Number changed",
-    body = `Number changed from ${event.params.from} to ${event.params.to}`,
-    timestamp = event.block.timestamp
-  sendEPNSNotificication(
-    recipient, 
-    cta, 
-    img, 
-    msg, 
-    sub, 
-    type, 
-    secret, 
-    title, 
-    body, 
-    timestamp
+  type = "3",
+  title = "Number changed",
+  body = `Number changed from ${event.params.from} to ${event.params.to}`,
+  subject = "Number changed",
+  message = `Number changed from ${event.params.from} to ${event.params.to}`,
+  image = "https://play-lh.googleusercontent.com/i911_wMmFilaAAOTLvlQJZMXoxBF34BMSzRmascHezvurtslYUgOHamxgEnMXTklsF-S",
+  secret = "null",
+  cta = "https://epns.io/",
+
+  notification = `{\"type\": \"${type}\", \"title\": \"${title}\", \"body\": \"${body}\", \"subject\": \"${subject}\", \"message\": \"${message}\", \"image\": \"${image}\", \"secret\": \"${secret}\", \"cta\": \"${cta}\"}`
+ 
+  sendEPNSNotification(
+  recipient, 
+   notification
   )
 }
 
-function sendEPNSNotificication(
-  recipient: string, 
-  cta: string, 
-  img: string, 
-  msg: string, 
-  sub: string, 
-  type: string, 
-  secret: string, 
-  title: string, 
-  body: string, 
-  timestamp: BigInt
-): void {
-  let id = timestamp.toHexString()
-  log.info('New id of Epnspushgraph is: {}', [id])
-  let notification = Epnspushgraph.load(id)
-  if (notification == null) {
-    notification = new Epnspushgraph(id)
-    notification.count = BigInt.fromI32(0)
+function sendEPNSNotification(recipient: string, notification: string): void 
+{
+  let id1 = subgraphID
+  log.info('New id of EpnsNotificationCounter is: {}', [id1])
+  let epnsNotificationCounter = EpnsNotificationCounter.load(id1)
+  if (epnsNotificationCounter == null) {
+    epnsNotificationCounter = new EpnsNotificationCounter(id1)
+    epnsNotificationCounter.totalCount = BigInt.fromI32(0)
   }
-  notification.count = (notification.count).plus(BigInt.fromI32(1))
-  notification.recipient = recipient
-  notification.asub = sub
-  notification.amsg = msg
-  notification.type = type
-  notification.acta = cta
-  notification.aimg = img
-  notification.secret = secret
-  notification.title = title
-  notification.body = body
-  notification.save()
+  epnsNotificationCounter.totalCount = (epnsNotificationCounter.totalCount).plus(BigInt.fromI32(1))
+
+  let count = epnsNotificationCounter.totalCount.toHexString()
+  let id2 = `${subgraphID}+${count}`
+  log.info('New id of EpnsPushNotification is: {}', [id2])
+  let epnsPushNotification = EpnsPushNotification.load(id2)
+  if (epnsPushNotification == null) {
+    epnsPushNotification = new EpnsPushNotification(id2)
+  }
+  epnsPushNotification.recipient = recipient
+  epnsPushNotification.notification = notification
+  epnsPushNotification.notificationNumber = epnsNotificationCounter.totalCount
+  epnsPushNotification.save()
+  epnsNotificationCounter.save()
 }
 
 

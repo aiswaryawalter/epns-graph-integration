@@ -2,22 +2,18 @@ type Storage @entity {
   id: ID!
   from: BigInt!
   to: BigInt!
-
 }
-
-type Epnspushgraph @entity {
+type EpnsNotificationCounter @entity {
   id: ID!
-  count: BigInt!
-  recipient: String!
-  acta: String!
-  aimg: String!
-  amsg: String!
-  asub: String!
-  type: String!
-  secret: String!
-  title: String!
-  body: String!
+  totalCount: BigInt!
 }
+type EpnsPushNotification @entity {
+  id: ID!
+  notificationNumber: BigInt!
+  recipient: String!
+  notification: String!
+}
+
 
 
 
